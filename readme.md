@@ -39,7 +39,7 @@ mysql> select @@tx_isolation;
 乐观锁
 ---
 
-[正确输出](lock/optimistic/correct/main.go)
+[正确输出](/blob/master/optimistic_lock/correct/main.go)
 
 ```
 余额：1000
@@ -57,7 +57,7 @@ mysql> select @@tx_isolation;
 余额: 1000
 ```
 
-[错误输出](lock/optimistic/incorrect/main.go)
+[错误输出](/blob/master/optimistic_lock/incorrect/main.go)
 
 ```
 余额：1000
@@ -75,7 +75,7 @@ mysql> select @@tx_isolation;
 死锁
 ---
 
-[输出](lock/deal_lock/main.go)
+[输出](/blob/master/dead_lock/main.go)
 
 ```
 [TransB]开始事务
