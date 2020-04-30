@@ -62,7 +62,7 @@ func Withdraw(db *sql.DB, c chan bool) {
 	result, _ := tx.Exec("update account set balance = ?, version = ? where username = ? and version = ?", a.balance-100, a.version+1, username, a.version)
 	num, _ := result.RowsAffected()
 	if num == 0 {
-		fmt.Println("[Withdraw]已被transfer转账事务修改，需要重新执行（stale object error）")
+		fmt.Println("[Withdraw]已被Transfer转账事务修改，需要重新执行（stale object error）")
 		tx.Rollback()
 		Withdraw(db, c) //失败重试
 	} else {
@@ -88,7 +88,7 @@ func Transfer(db *sql.DB, c chan bool) {
 	result, _ := tx.Exec("update account set balance = ?, version = ? where username = ? and version = ?", a.balance+100, a.version+1, username, a.version)
 	num, _ := result.RowsAffected()
 	if num == 0 {
-		fmt.Println("[Transfer]已被withdraw取款事务修改，需要重新执行（stale object error）")
+		fmt.Println("[Transfer]已被Withdraw取款事务修改，需要重新执行（stale object error）")
 		tx.Rollback()
 		Transfer(db, c) //失败重试
 	} else {
