@@ -6,43 +6,71 @@ import (
 	"time"
 )
 
-var m sync.RWMutex
-var x = 1
+type resource struct {
+	m    sync.RWMutex
+	data int //临界资源
+}
+
+func (r *resource) read() {
+	r.m.RLock()
+	defer r.m.RUnlock()
+	time.Sleep(time.Second)
+	fmt.Println("Reading data:", r.data)
+}
+
+func (r *resource) write(i int) {
+	r.m.Lock()
+	defer r.m.Unlock()
+	r.data = i
+	time.Sleep(time.Second)
+	fmt.Println("Writing data:", i)
+}
 
 func main() {
-	c1 := make(chan bool)
-	c2 := make(chan bool)
+	r := &resource{data: 1}
 
+	var wg sync.WaitGroup
+
+	//读-读不互斥
 	start := time.Now()
-	go read(c1)
-	go read(c2)
-	<-c1
-	<-c2
-	fmt.Println("time taken:", time.Since(start)) //1s
+	wg.Add(2)
+	go func() {
+		r.read()
+		wg.Done()
+	}()
+	go func() {
+		r.read()
+		wg.Done()
+	}()
+	wg.Wait()
+	fmt.Println("time taken for read-read concurrency:", time.Since(start)) //1s
 
+	// 读-写互斥
 	start = time.Now()
-	go write(2, c1)
-	go write(3, c2)
-	<-c1
-	<-c2
-	fmt.Println("time taken:", time.Since(start)) //2s
-	fmt.Println(x)
-}
+	wg.Add(2)
+	go func() {
+		r.write(2)
+		wg.Done()
+	}()
+	go func() {
+		r.read()
+		wg.Done()
+	}()
+	wg.Wait()
+	fmt.Println("time taken for read-write exclusivity:", time.Since(start)) //2s
 
-//读是共享锁，可以并发的读，great
-func read(ch chan bool) {
-	m.RLock()
-	time.Sleep(time.Second)
-	fmt.Println(x)
-	m.RUnlock()
-	ch <- true
-}
+	//写-写互斥
+	start = time.Now()
+	wg.Add(2)
+	go func() {
+		r.write(2)
+		wg.Done()
+	}()
+	go func() {
+		r.write(3)
+		wg.Done()
+	}()
+	wg.Wait()
+	fmt.Println("time taken for write-write exclusivity:", time.Since(start)) //2s
 
-//写是互斥锁
-func write(i int, ch chan bool) {
-	m.Lock()
-	time.Sleep(time.Second)
-	x = i
-	m.Unlock()
-	ch <- true
 }
