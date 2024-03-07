@@ -45,7 +45,7 @@ func main() {
 	wg.Wait()
 	fmt.Println("time taken for read-read concurrency:", time.Since(start)) //1s
 
-	// 读-写互斥
+	//读-写互斥
 	start = time.Now()
 	wg.Add(2)
 	go func() {
