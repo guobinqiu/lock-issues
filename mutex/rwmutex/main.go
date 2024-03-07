@@ -72,5 +72,4 @@ func main() {
 	}()
 	wg.Wait()
 	fmt.Println("time taken for write-write exclusivity:", time.Since(start)) //2s
-
 }
